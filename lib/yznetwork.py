@@ -86,7 +86,7 @@ class WLANNetwork(object):
 
             if self.wlan is None:
                 logger.error('Error establishing connection to wlan [' + self.ssid + ']')
-                raise IOError()
+                raise IOError('Network connection to wlan [' + self.ssid + '] failed')
 
     def disconnect(self):
         """

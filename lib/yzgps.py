@@ -17,7 +17,7 @@
 # THE SOFTWARE.
 
 # Linter
-# pylint: disable=R1702,C0103
+# pylint: disable=R1702,C0103,E1101
 
 """
 Yeezz GPS sensor based on serial GPS modules:
@@ -26,6 +26,7 @@ Yeezz GPS sensor based on serial GPS modules:
 Parsing of the NMEA sentences is done with the great micropyGPS library
 """
 import logging
+import time
 from micropygps import MicropyGPS
 
 # Initialize logging
@@ -36,6 +37,9 @@ except ImportError:
     logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger(__name__)
+
+DEFAULT_TX_PIN = "P3"
+DEFAULT_RX_PIN = "P4"
 
 class GPS(object):
     """
@@ -49,22 +53,24 @@ class GPS(object):
         self.uart = uart
         self.parser = MicropyGPS(location_formatting='dd')
         self.is_running = False
-        self.stop_requested = False
         self.segments_parsed = []
 
-    def start(self):
+    def update(self):
         """
-        Start reading the GPS values
+        Update the GPS values
         """
         logger.info('Start reading the GPS values')
         self.is_running = True
 
         if self.uart:
-            while not self.stop_requested:
 
+            for x in range(0, 4):
+
+                logger.debug('GPS loop counter [' + str(x) + ']')
                 if self.uart.any():
 
                     try:
+
                         read_bytes = self.uart.readall()
                         for c in read_bytes:
                             segment = self.parser.update(c)
@@ -72,18 +78,14 @@ class GPS(object):
                                 logger.info('Found segment [%s]', segment)
                                 if segment not in self.segments_parsed:
                                     self.segments_parsed.append(segment)
+
+                        time.sleep_ms(500) # Wait 0.5sec
+
                     except IOError as e:
                         logger.error('IOError [%s]', e)
                         break
 
-
-
-    def stop(self):
-        """
-        Stop processing GPS values
-        """
-        logger.info('Stop reading the GPS values')
-        self.stop_requested = True
+        self.is_running = False
 
     @property
     def latitude(self):

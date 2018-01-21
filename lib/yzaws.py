@@ -72,6 +72,8 @@ class AWS(object):
         if self.client.connect():
             self.is_connected = True
             logger.info('AWS IoT connection succeeded')
+        else:
+            raise IOError('AWS IoT connection failed')
 
     def publish(self, msg=None):
         """
