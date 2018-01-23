@@ -64,7 +64,7 @@ class Scanner(object):
             self._ble = Bluetooth()
 
         # Start the alarm to stop the BLE scanning
-        self._alarm = Timer.Alarm(self._alarm_handler, timeout)
+        self._alarm = Timer.Alarm(self._alarm_handler, s=timeout)
 
         self._ble.start_scan(timeout)
         while self._ble.isscanning():
