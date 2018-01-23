@@ -41,9 +41,9 @@ FTP_USER = "Yeezz"
 FTP_PASSWORD = "123YEEZZ4567"
 
 # WLAN settings
-WLAN_SSID = "HARTOG_GUEST"        # SSID to connect to
-WLAN_KEY = "1234567890"           # SSID key
-WLAN_INT_ANTENNA = True     # True internal antenna else False
+WLAN_SSID = "GUEST"        # SSID to connect to
+WLAN_KEY = "1234567890"    # SSID key
+WLAN_INT_ANTENNA = True    # True internal antenna else False
 
 # BLE scan time in seconds before sending the results to AWS
 SCAN_TIME_IN_SECONDS = 300
