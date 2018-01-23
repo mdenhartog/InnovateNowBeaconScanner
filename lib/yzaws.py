@@ -80,7 +80,7 @@ class AWS(object):
         """
         Publish message
         """
-        logger.debug('Publish [{}]', json.dumps(msg))
+        logger.info('Publish [{}]', json.dumps(msg))
         self.client.publish(awsconfig.AWS_IOT_TOPIC, json.dumps(msg), 1)
 
     def disconnect(self):

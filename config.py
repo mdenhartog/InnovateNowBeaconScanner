@@ -46,7 +46,7 @@ WLAN_KEY = "1234567890"    # SSID key
 WLAN_INT_ANTENNA = True    # True internal antenna else False
 
 # BLE scan time in seconds before sending the results to AWS
-SCAN_TIME_IN_SECONDS = 300
+SCAN_TIME_IN_SECONDS = 240
 
 # GPS is an optional sensor
 # When this setting is set to False you can add a fixed latitude/longitude

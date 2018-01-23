@@ -127,6 +127,7 @@ try:
 
         # Start Beacon scanning for 2min
         scanner.start(timeout=config.SCAN_TIME_IN_SECONDS)
+        scanner.stop()
 
         wdt.feed() # Feed
 
@@ -161,7 +162,6 @@ try:
         wdt.feed()
 
         # Reset everything
-        scanner.stop()
         scanner.reset()
 
         gps_msg = None
