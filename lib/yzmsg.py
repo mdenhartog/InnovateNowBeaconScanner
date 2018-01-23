@@ -107,16 +107,16 @@ class EnvironMessage(Message):
         self.message['sensor'] = 'Environment'
 
         if self.temperature:
-            self.message['temperature'] = self.temperature
+            self.message['temperature'] = round(self.temperature, 2)
 
         if self.humidity:
-            self.message['humidity'] = self.humidity
+            self.message['humidity'] = round(self.humidity, 0)
 
         if self.barometric_pressure:
-            self.message['barometricPressure'] = self.barometric_pressure
+            self.message['barometricPressure'] = round(self.barometric_pressure, 0)
 
         if self.lux:
-            self.message['lux'] = self.lux
+            self.message['lux'] = round(self.lux, 0)
 
         return self.message
 
@@ -144,6 +144,7 @@ class AliveMessage(Message):
         self.message['app_id'] = self.application_id
         self.message['time'] = time.time()
 
+        return self.message
 
 class AWSMessage(Message):
     """

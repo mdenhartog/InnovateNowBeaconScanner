@@ -17,7 +17,7 @@
 # THE SOFTWARE.
 
 # Linter
-# pylint: disable=C0103
+# pylint: disable=E0401,E1101,W0703,C0411,C0103,E1205
 
 """
 Yeezz Beacon Scanner program
@@ -32,6 +32,9 @@ Steps
 6. Initialize GPS
 7. Initialize Environment sensor
 8. Send message to AWS Yeezz IoT Environment
+---------------------------------------------
+Next version items
+---------------------------------------------
 9. Retrieve messages from AWS Yeezz IoT Enviroment for this device
 10. Check for OTA updates (once a day)
 """
@@ -41,26 +44,28 @@ import machine
 import config
 import pycom
 import gc
+import sys
 
 from version import VERSION
 from yznetwork import WLANNetwork, NTP
 from yzaws import AWS
+from yzble import Scanner
 from yzmsg import AliveMessage, GPSMessage, EnvironMessage, AWSMessage
 from yzgps import GPS, DEFAULT_RX_PIN, DEFAULT_TX_PIN
-from yzenvsensor import EnviromentalSensor
+from yzenvsensor import Environment
 
 # Initialize logging
 try:
-    logging.basicConfig(level=config.LOG_LEVEL)
+    logging.basicConfig(level=config.LOG_LEVEL, stream=sys.stdout)
 except ImportError:
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
 logger = logging.getLogger(__name__)
 
 # Led orange
 pycom.rgbled(config.LED_COLOR_WARNING)
 
-logger.info('Start Yeezz Beacon Scanner version %s', VERSION)
+logger.info('Start Yeezz Beacon Scanner version {}', VERSION)
 logger.debug('Memory allocated: ' + str(gc.mem_alloc()) + ' ,free: ' + str(gc.mem_free()))
 
 # Set watchdog 5min
@@ -69,7 +74,7 @@ wdt = machine.WDT(timeout=300000)
 try:
 
     # Start network
-    logger.info('Start WLAN network [%s]', config.WLAN_SSID)
+    logger.info('Start WLAN network [{}]', config.WLAN_SSID)
     network = WLANNetwork(ssid=config.WLAN_SSID, key=config.WLAN_KEY)
     network.connect()
 
@@ -102,20 +107,70 @@ try:
     # Init I2C
     i2c = machine.I2C(0, machine.I2C.MASTER, baudrate=400000)
 
+    # Init scanner
+    scanner = Scanner(max_list_items=50)
+
+    # Init GPS
+    gps = GPS(uart=uart)
+
+    # Init environment sensors
+    environ = Environment(i2c)
+
+    # Led off
+    pycom.heartbeat(False)
+
     while True:
+
+        logger.debug('Memory allocated: ' + str(gc.mem_alloc()) + ' ,free: ' + str(gc.mem_free()))
 
         wdt.feed() # Feed
 
         # Start Beacon scanning for 2min
+        scanner.start(timeout=config.SCAN_TIME_IN_SECONDS)
+
+        wdt.feed() # Feed
 
         # Read GPS coordinates
-        gps = GPS(uart=uart)
         gps.update()
 
-        # Read Environment values
+        wdt.feed() # Feed
+
+        # Construct messsages
+        gps_msg = GPSMessage(latitude=gps.latitude,
+                             longitude=gps.longitude,
+                             speed=gps.speed,
+                             course=gps.course)
+
+        env_msg = EnvironMessage(temperature=environ.temperature,
+                                 humidity=environ.humidity,
+                                 barometric_pressure=environ.barometric_pressure,
+                                 lux=environ.lux)
+
+        aws_msg = AWSMessage(device_id=config.DEVICE_ID,
+                             application_id=config.APPLICATION_ID,
+                             environ_message=env_msg.to_dict(),
+                             gps_message=gps_msg.to_dict(),
+                             beacons=scanner.beacons,
+                             tags=scanner.tags)
 
         # Publish to AWS
+        pycom.rgbled(config.LED_COLOR_OK) # Led green
+        aws.publish(aws_msg.to_dict())
+        pycom.heartbeat(False)
+
+        wdt.feed()
+
+        # Reset everything
+        scanner.stop()
+        scanner.reset()
+
+        gps_msg = None
+        env_msg = None
+        aws_msg = None
+
+        # Garbage collect
+        gc.collect()
 
 except Exception as e:
     pycom.rgbled(config.LED_COLOR_ERROR)
-    logger.error('Unexpected error [%s]', e)
+    logger.error('Unexpected error {}', e)

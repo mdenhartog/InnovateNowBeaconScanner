@@ -24,6 +24,7 @@ Yeezz Core Network Library
 """
 
 import logging
+import sys
 import time
 import machine
 from network import WLAN
@@ -31,9 +32,9 @@ from network import WLAN
 # Initialize logging
 try:
     import config
-    logging.basicConfig(level=config.LOG_LEVEL)
+    logging.basicConfig(level=config.LOG_LEVEL, stream=sys.stdout)
 except ImportError:
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
 logger = logging.getLogger(__name__)
 

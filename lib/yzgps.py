@@ -17,7 +17,7 @@
 # THE SOFTWARE.
 
 # Linter
-# pylint: disable=R1702,C0103,E1101
+# pylint: disable=R1702,C0103,E1101,E0401,W0703
 
 """
 Yeezz GPS sensor based on serial GPS modules:
@@ -26,15 +26,16 @@ Yeezz GPS sensor based on serial GPS modules:
 Parsing of the NMEA sentences is done with the great micropyGPS library
 """
 import logging
+import sys
 import time
 from micropygps import MicropyGPS
 
 # Initialize logging
 try:
     import config
-    logging.basicConfig(level=config.LOG_LEVEL)
+    logging.basicConfig(level=config.LOG_LEVEL, stream=sys.stdout)
 except ImportError:
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
 logger = logging.getLogger(__name__)
 
@@ -72,17 +73,18 @@ class GPS(object):
                     try:
 
                         read_bytes = self.uart.readall()
-                        for c in read_bytes:
-                            segment = self.parser.update(c)
+                        gps_string = read_bytes.decode("utf-8")
+                        for c in gps_string:
+                            segment = self.parser.update(str(c))
                             if segment:
-                                logger.info('Found segment [%s]', segment)
+                                logger.debug('Found segment [{}]', segment)
                                 if segment not in self.segments_parsed:
                                     self.segments_parsed.append(segment)
 
                         time.sleep_ms(500) # Wait 0.5sec
 
-                    except IOError as e:
-                        logger.error('IOError [%s]', e)
+                    except Exception as e:
+                        logger.error('IOError [{}]', e)
                         break
 
         self.is_running = False

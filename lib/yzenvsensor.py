@@ -17,7 +17,7 @@
 # THE SOFTWARE.
 
 # Linter
-# pylint: disable=C0103
+# pylint: disable=C0103,E0401
 
 """
 Yeezz Environmental Sensor based on:
@@ -25,21 +25,22 @@ Yeezz Environmental Sensor based on:
     - TL2561 sensor for Light intensity in Lux
 """
 import logging
+import sys
 import bme280
 import tsl2561
 
 # Initialize logging
 try:
     import config
-    logging.basicConfig(level=config.LOG_LEVEL)
+    logging.basicConfig(level=config.LOG_LEVEL, stream=sys.stdout)
 except ImportError:
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
 logger = logging.getLogger(__name__)
 
-class EnviromentalSensor(object):
+class Environment(object):
     """
-    Class for getting the Enviromental sensor values
+    Class for getting the Enviroment sensor values
     """
 
     def __init__(self, i2c=None):
@@ -51,9 +52,9 @@ class EnviromentalSensor(object):
         if self.i2c:
             self.addresses = self.i2c.scan()
 
-            logger.debug('I2C addresses [%s]', self.addresses)
-            logger.debug('BME280 [%s]', bme280.BME280_I2CADDR)
-            logger.debug('TSL2561 [%s]', tsl2561.TSL2561_I2CADDR)
+            logger.debug('I2C addresses [{}]', self.addresses)
+            logger.debug('BME280 [{}]', bme280.BME280_I2CADDR)
+            logger.debug('TSL2561 [{}]', tsl2561.TSL2561_I2CADDR)
 
             self.bme280 = None
             if bme280.BME280_I2CADDR in self.addresses:

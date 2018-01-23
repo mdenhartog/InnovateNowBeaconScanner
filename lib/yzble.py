@@ -23,15 +23,16 @@
 
 import binascii
 import logging
+import sys
 from machine import Timer
 from network import Bluetooth
 
 # Initialize logging
 try:
     import config
-    logging.basicConfig(level=config.LOG_LEVEL)
+    logging.basicConfig(level=config.LOG_LEVEL, stream=sys.stdout)
 except ImportError:
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +42,7 @@ class Scanner(object):
     def __init__(self, max_list_items=25):
 
         self._beacons = []
-        self._itags = []
+        self._tags = []
 
         self._max_list_items = max_list_items
         self._ble = None
@@ -83,9 +84,9 @@ class Scanner(object):
 
     def reset(self):
         """ Reset the retrieved beacon/tag list during scanning """
-        logger.info('Reset found beacon/itag list')
+        logger.info('Reset beacon/tag list')
         self._beacons[:] = []
-        self._itags[:] = []
+        self._tags[:] = []
 
     @property
     def beacons(self):
@@ -94,9 +95,9 @@ class Scanner(object):
         return res
 
     @property
-    def itags(self):
-        """ Return the itags found """
-        res = list(self._itags) # make a copy
+    def tags(self):
+        """ Return the tags found """
+        res = list(self._tags) # make a copy
         return res
 
     def beacon_data_collect(self):
@@ -108,11 +109,11 @@ class Scanner(object):
             if self._ble.resolve_adv_data(adv.data, Bluetooth.ADV_NAME_CMPL) == "ITAG":
 
                 binitag = binascii.hexlify(adv[0])
-                itag = binitag.decode('UTF-8')
+                tag = binitag.decode('UTF-8')
 
-                if itag not in self._itags:
-                    logger.debug('Found tag [%s]', itag)
-                    self._itags.append(itag)
+                if tag not in self._tags:
+                    logger.debug('Found tag [{}]', tag)
+                    self._tags.append(tag)
 
             else:
 
@@ -126,5 +127,5 @@ class Scanner(object):
 
                     # Check if beacon is in list
                     if beacon not in self._beacons:
-                        logger.debug('Found beacon [%s]', beacon)
+                        logger.debug('Found beacon [{}]', beacon)
                         self._beacons.append(beacon)

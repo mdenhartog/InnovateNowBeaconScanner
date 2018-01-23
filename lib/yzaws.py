@@ -24,6 +24,7 @@ Yeezz AWS library
 """
 import logging
 import json
+import sys
 
 import aws_config as awsconfig
 from MQTTLib import AWSIoTMQTTClient
@@ -31,9 +32,9 @@ from MQTTLib import AWSIoTMQTTClient
 # Initialize logging
 try:
     import config
-    logging.basicConfig(level=config.LOG_LEVEL)
+    logging.basicConfig(level=config.LOG_LEVEL, stream=sys.stdout)
 except ImportError:
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +80,7 @@ class AWS(object):
         """
         Publish message
         """
-        logger.debug('Publish [%s]', json.dumps(msg))
+        logger.debug('Publish [{}]', json.dumps(msg))
         self.client.publish(awsconfig.AWS_IOT_TOPIC, json.dumps(msg), 1)
 
     def disconnect(self):
