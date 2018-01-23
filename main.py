@@ -174,3 +174,5 @@ try:
 except Exception as e:
     pycom.rgbled(config.LED_COLOR_ERROR)
     logger.error('Unexpected error {}', e)
+
+    machine.reset() # reset device
