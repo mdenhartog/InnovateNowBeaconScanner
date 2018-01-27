@@ -53,7 +53,8 @@ class GPSMessage(Message):
     """
     GPS message
     """
-    def __init__(self, latitude=None, longitude=None, speed=None, course=None):
+    def __init__(self, latitude=None, longitude=None, speed=None,
+                 course=None, altitude=None, direction=None):
 
         super(GPSMessage, self).__init__()
 
@@ -61,6 +62,8 @@ class GPSMessage(Message):
         self.longitude = longitude
         self.speed = speed
         self.course = course
+        self.altitude = altitude
+        self.direction = direction
 
     def to_dict(self):
         """
@@ -81,6 +84,12 @@ class GPSMessage(Message):
 
         if self.course:
             self.message['course'] = self.course
+
+        if self.direction:
+            self.message['direction'] = self.direction
+
+        if self.altitude:
+            self.message['altitude'] = self.altitude
 
         return self.message
 

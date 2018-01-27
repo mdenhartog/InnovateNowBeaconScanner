@@ -39,8 +39,11 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_TX_PIN = "P3"
-DEFAULT_RX_PIN = "P4"
+DEFAULT_TX_PIN = 'P3'
+DEFAULT_RX_PIN = 'P4'
+
+# GPS_SEGMENTS = ['GPGSV', 'GPRMC', 'GPGSA', 'GPGGA', 'GPGLL', 'GPVTG']
+GPS_SEGMENTS = ['GPRMC', 'GPGSA', 'GPGGA', 'GPGLL']
 
 class GPS(object):
     """
@@ -65,7 +68,11 @@ class GPS(object):
 
         if self.uart:
 
-            for x in range(0, 4):
+            self.segments_parsed = []
+            segments_found = False
+            x = 0
+
+            while not segments_found:
 
                 logger.debug('GPS loop counter [' + str(x) + ']')
                 if self.uart.any():
@@ -74,6 +81,8 @@ class GPS(object):
 
                         read_bytes = self.uart.readall()
                         gps_string = read_bytes.decode("utf-8")
+                        logger.debug('GPS [{}]', gps_string)
+
                         for c in gps_string:
                             segment = self.parser.update(str(c))
                             if segment:
@@ -81,7 +90,14 @@ class GPS(object):
                                 if segment not in self.segments_parsed:
                                     self.segments_parsed.append(segment)
 
-                        time.sleep_ms(500) # Wait 0.5sec
+                                    logger.debug('Parsed segments [{}]', self.segments_parsed)
+
+                                    # GPGSV, GPRMC, GPGSA, gpGGA, GPGLL, GPVTG
+                                    if all(i in GPS_SEGMENTS for i in self.segments_parsed):
+                                        segments_found = True
+
+                        x += 1
+                        time.sleep(2) # Wait 2sec
 
                     except Exception as e:
                         logger.error('IOError [{}]', e)
@@ -113,7 +129,6 @@ class GPS(object):
                                                                        self.parser.timestamp[1],
                                                                        self.parser.timestamp[2])
 
-    @property
     def speed(self, unit='kph'):
         """
         Return speed
@@ -131,6 +146,16 @@ class GPS(object):
         return self.parser.speed[2]
 
     @property
+    def altitude(self):
+        """ Altitude """
+        return self.parser.altitude
+
+    @property
     def course(self):
         """ Actual course """
+        return self.parser.course
+
+    @property
+    def direction(self):
+        """ Direction """
         return self.parser.compass_direction()

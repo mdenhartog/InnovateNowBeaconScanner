@@ -45,6 +45,7 @@ import config
 import pycom
 import gc
 import sys
+import time
 
 from version import VERSION
 from yznetwork import WLANNetwork, NTP
@@ -139,8 +140,10 @@ try:
         # Construct messsages
         gps_msg = GPSMessage(latitude=gps.latitude,
                              longitude=gps.longitude,
-                             speed=gps.speed,
-                             course=gps.course)
+                             altitude=gps.altitude,
+                             speed=gps.speed(),
+                             course=gps.course,
+                             direction=gps.direction)
 
         env_msg = EnvironMessage(temperature=environ.temperature,
                                  humidity=environ.humidity,
@@ -159,7 +162,7 @@ try:
         aws.publish(aws_msg.to_dict())
         pycom.heartbeat(False)
 
-        wdt.feed()
+        wdt.feed() # Feed
 
         # Reset everything
         scanner.reset()
@@ -168,11 +171,9 @@ try:
         env_msg = None
         aws_msg = None
 
-        # Garbage collect
-        gc.collect()
-
 except Exception as e:
     pycom.rgbled(config.LED_COLOR_ERROR)
     logger.error('Unexpected error {}', e)
 
+    time.sleep(5) # Wait for 5secs before reset
     machine.reset() # reset device

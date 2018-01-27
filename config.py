@@ -22,7 +22,7 @@ Yeezz Beacon Scanner configuration settings
 import logging
 
 # Log level
-LOG_LEVEL = logging.INFO
+LOG_LEVEL = logging.DEBUG
 
 # Device identifier for Yeezz IoT environment
 DEVICE_ID = "DEV_BEACONSCANNER_1"
@@ -46,6 +46,7 @@ WLAN_KEY = "1234567890"    # SSID key
 WLAN_INT_ANTENNA = True    # True internal antenna else False
 
 # BLE scan time in seconds before sending the results to AWS
+# 240
 SCAN_TIME_IN_SECONDS = 240
 
 # GPS is an optional sensor
