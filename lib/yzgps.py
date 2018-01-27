@@ -93,7 +93,7 @@ class GPS(object):
                                     logger.debug('Parsed segments [{}]', self.segments_parsed)
 
                                     # GPGSV, GPRMC, GPGSA, gpGGA, GPGLL, GPVTG
-                                    if all(i in GPS_SEGMENTS for i in self.segments_parsed):
+                                    if all(i in self.segments_parsed for i in GPS_SEGMENTS):
                                         segments_found = True
 
                         x += 1
