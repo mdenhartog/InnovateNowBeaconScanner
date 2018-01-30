@@ -29,9 +29,6 @@ AWS_IOT_HOST = "a3c6ugxemi0ejq.iot.eu-central-1.amazonaws.com"
 # Port
 AWS_IOT_PORT = 8883
 
-# Timeout
-AWS_IOT_TIMEOUT = 60
-
 # Topic to publish to
 AWS_IOT_TOPIC = "yzbeaconscanner"
 

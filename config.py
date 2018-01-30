@@ -22,7 +22,7 @@ Yeezz Beacon Scanner configuration settings
 import logging
 
 # Log level
-LOG_LEVEL = logging.DEBUG
+LOG_LEVEL = logging.INFO
 
 # Device identifier for Yeezz IoT environment
 DEVICE_ID = "DEV_BEACONSCANNER_1"
@@ -41,7 +41,7 @@ FTP_USER = "Yeezz"
 FTP_PASSWORD = "123YEEZZ4567"
 
 # WLAN settings
-WLAN_SSID = "HARTOG_GUEST"        # SSID to connect to
+WLAN_SSID = "HARTOG_GUEST" # SSID to connect to
 WLAN_KEY = "1234567890"    # SSID key
 WLAN_INT_ANTENNA = True    # True internal antenna else False
 
@@ -51,7 +51,7 @@ SCAN_TIME_IN_SECONDS = 240
 
 # GPS is an optional sensor
 # When this setting is set to False you can add a fixed latitude/longitude
-GPS_AVAILABLE = False
+GPS_AVAILABLE = True
 GPS_FIXED_LATITUDE = None
 GPS_FIXED_LONGITUDE = None
 

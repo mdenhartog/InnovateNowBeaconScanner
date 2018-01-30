@@ -43,7 +43,7 @@ DEFAULT_TX_PIN = 'P3'
 DEFAULT_RX_PIN = 'P4'
 
 # GPS_SEGMENTS = ['GPGSV', 'GPRMC', 'GPGSA', 'GPGGA', 'GPGLL', 'GPVTG']
-GPS_SEGMENTS = ['GPRMC', 'GPGSA', 'GPGGA', 'GPGLL']
+GPS_SEGMENTS = ['GPRMC', 'GPGGA']
 
 class GPS(object):
     """
@@ -68,11 +68,11 @@ class GPS(object):
 
         if self.uart:
 
-            self.segments_parsed = []
+            self.segments_parsed [:] = []
             segments_found = False
             x = 0
 
-            while not segments_found:
+            while not segments_found and x < 4:
 
                 logger.debug('GPS loop counter [' + str(x) + ']')
                 if self.uart.any():
@@ -90,14 +90,13 @@ class GPS(object):
                                 if segment not in self.segments_parsed:
                                     self.segments_parsed.append(segment)
 
-                                    logger.debug('Parsed segments [{}]', self.segments_parsed)
-
-                                    # GPGSV, GPRMC, GPGSA, gpGGA, GPGLL, GPVTG
-                                    if all(i in self.segments_parsed for i in GPS_SEGMENTS):
-                                        segments_found = True
-
-                        x += 1
-                        time.sleep(2) # Wait 2sec
+                        # GPGSV, GPRMC, GPGSA, gpGGA, GPGLL, GPVTG
+                        logger.debug('Parsed segments [{}]', self.segments_parsed)
+                        if all(i in self.segments_parsed for i in GPS_SEGMENTS):
+                            segments_found = True
+                        else:
+                            x += 1
+                            time.sleep(2) # Wait 2sec
 
                     except Exception as e:
                         logger.error('IOError [{}]', e)

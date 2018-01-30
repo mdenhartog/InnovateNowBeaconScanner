@@ -24,7 +24,6 @@
 import binascii
 import logging
 import sys
-from machine import Timer
 from network import Bluetooth
 
 # Initialize logging
@@ -47,24 +46,12 @@ class Scanner(object):
         self._max_list_items = max_list_items
         self._ble = None
 
-        # This part is added due to a bug in firmware 1.10.2b1
-        self._alarm = None
-
-    def _alarm_handler(self, alarm):
-        """ Handler for the alarm, stop scanning """
-        if self._ble:
-            self._ble.stop_scan()
-        alarm.cancel()
-
     def start(self, timeout=-1):
         """ Start beacon scanning """
 
         logger.info('Start scanning for beacons and tags')
         if self._ble is None:
             self._ble = Bluetooth()
-
-        # Start the alarm to stop the BLE scanning
-        self._alarm = Timer.Alarm(self._alarm_handler, s=timeout)
 
         self._ble.start_scan(timeout)
         while self._ble.isscanning():
@@ -75,8 +62,8 @@ class Scanner(object):
         logger.info('Stop scanning for beacons and tags')
         if self._ble:
             self._ble.stop_scan()
-            self._ble.deinit()
-            self._ble = None
+            #self._ble.deinit()
+            #self._ble = None
 
     def set_max_list_items(self, max_list_items):
         """ Set the max list items to return"""

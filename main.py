@@ -102,20 +102,19 @@ try:
 
     wdt.feed() # Feed
 
-    # Init UART gps
-    uart = machine.UART(1, pins=(DEFAULT_TX_PIN, DEFAULT_RX_PIN), baudrate=9600)
+    # Init gps
+    if config.GPS_AVAILABLE:
+        uart = machine.UART(1, pins=(DEFAULT_TX_PIN, DEFAULT_RX_PIN), baudrate=9600)
+        gps = GPS(uart=uart)
 
     # Init I2C
     i2c = machine.I2C(0, machine.I2C.MASTER, baudrate=400000)
 
-    # Init scanner
-    scanner = Scanner(max_list_items=50)
-
-    # Init GPS
-    gps = GPS(uart=uart)
-
     # Init environment sensors
     environ = Environment(i2c)
+
+    # Init scanner
+    scanner = Scanner(max_list_items=50)
 
     # Led off
     pycom.heartbeat(False)
@@ -133,17 +132,22 @@ try:
         wdt.feed() # Feed
 
         # Read GPS coordinates
-        gps.update()
+        if config.GPS_AVAILABLE:
+            gps.update()
 
         wdt.feed() # Feed
 
         # Construct messsages
-        gps_msg = GPSMessage(latitude=gps.latitude,
-                             longitude=gps.longitude,
-                             altitude=gps.altitude,
-                             speed=gps.speed(),
-                             course=gps.course,
-                             direction=gps.direction)
+        if config.GPS_AVAILABLE:
+            gps_msg = GPSMessage(latitude=gps.latitude,
+                                 longitude=gps.longitude,
+                                 altitude=gps.altitude,
+                                 speed=gps.speed(),
+                                 course=gps.course,
+                                 direction=gps.direction)
+        else:
+            gps_msg = GPSMessage(latitude=config.GPS_FIXED_LATITUDE,
+                                 longitude=config.GPS_FIXED_LONGITUDE)
 
         env_msg = EnvironMessage(temperature=environ.temperature,
                                  humidity=environ.humidity,
@@ -171,9 +175,16 @@ try:
         env_msg = None
         aws_msg = None
 
+        # Free up space
+        if gc.mem_free() < 30000:
+            gc.collect()
+
 except Exception as e:
     pycom.rgbled(config.LED_COLOR_ERROR)
     logger.error('Unexpected error {}', e)
+
+    if aws:
+        aws.disconnect()
 
     time.sleep(5) # Wait for 5secs before reset
     machine.reset() # reset device
