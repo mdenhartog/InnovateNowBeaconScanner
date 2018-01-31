@@ -44,7 +44,7 @@ class Timer(object):
         """
         Init timer
         """
-        self._alarm = machine.Timer.Alarm(callback, seconds, periodic=True)
+        self._alarm = machine.Timer.Alarm(handler=callback, s=seconds)
 
 class ResetTimer(Timer):
     """
@@ -55,7 +55,7 @@ class ResetTimer(Timer):
         """
         Init reset Timer
         """
-        super(ResetTimer, self).__init__(self._reset_handler, seconds)
+        super(ResetTimer, self).__init__(seconds, self._reset_handler)
 
     def _reset_handler(self, alarm):
         """
