@@ -54,6 +54,7 @@ from yzble import Scanner
 from yzmsg import AliveMessage, GPSMessage, EnvironMessage, AWSMessage
 from yzgps import GPS, DEFAULT_RX_PIN, DEFAULT_TX_PIN
 from yzenvsensor import Environment
+from yztimer import ResetTimer
 
 # Initialize logging
 try:
@@ -71,6 +72,10 @@ logger.debug('Memory allocated: ' + str(gc.mem_alloc()) + ' ,free: ' + str(gc.me
 
 # Set watchdog 5min
 wdt = machine.WDT(timeout=300000)
+
+# Start device reset timer
+if config.DEVICE_RESET_AFTER_SECONDS:
+    reset_timer = ResetTimer(config.DEVICE_RESET_AFTER_SECONDS)
 
 try:
 
@@ -187,4 +192,4 @@ except Exception as e:
         aws.disconnect()
 
     time.sleep(5) # Wait for 5secs before reset
-    machine.reset() # reset device
+    machine.reset() # Reset device

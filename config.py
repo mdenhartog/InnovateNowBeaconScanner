@@ -34,6 +34,9 @@ APPLICATION_ID = "YeezzBeaconScanner"
 # True for development set this parameter to False for production
 SERIAL_ACCESS = True
 
+# Reset device after the specified seconds
+DEVICE_RESET_AFTER_SECONDS = 7200
+
 # FTP Access
 # True for development set this parameter to False for production
 FTP_ACCESS = True
