@@ -20,7 +20,7 @@
 # pylint: disable=E0401,C0103
 
 """
-Yeezz AWS library
+InnovateNow AWS library
 """
 import logging
 import json

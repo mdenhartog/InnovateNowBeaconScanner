@@ -20,7 +20,7 @@
 # pylint: disable=E0401,E1101,C0103
 
 """
-Yeezz Beacon Scanner boot configuration
+InnovateNow Beacon Scanner boot configuration
 """
 
 import os

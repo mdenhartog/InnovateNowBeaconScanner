@@ -20,7 +20,7 @@
 # pylint: disable=C0103,E0401
 
 """
-Yeezz Environmental Sensor based on:
+InnovateNow Environmental Sensor based on:
     - BME280 sensor for Temperature, Humidity and Barometric pressure
     - TL2561 sensor for Light intensity in Lux
 """

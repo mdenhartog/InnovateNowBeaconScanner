@@ -17,10 +17,10 @@
 # THE SOFTWARE.
 
 # Linter
-# pylint: disable=R0913
+# pylint: disable=R0913,R0902,W0622,C0103
 
 """
-Yeezz Message module
+InnovateNow Message module
 """
 import json
 import time
@@ -53,11 +53,12 @@ class GPSMessage(Message):
     """
     GPS message
     """
-    def __init__(self, latitude=None, longitude=None, speed=None,
+    def __init__(self, id=None, latitude=None, longitude=None, speed=None,
                  course=None, altitude=None, direction=None):
 
         super(GPSMessage, self).__init__()
 
+        self.id = id
         self.latitude = latitude
         self.longitude = longitude
         self.speed = speed
@@ -71,7 +72,8 @@ class GPSMessage(Message):
         """
         self.message = super(GPSMessage, self).to_dict()
 
-        self.message['sensor'] = 'GPS'
+        if self.id:
+            self.message['sensorId'] = self.id
 
         if self.latitude:
             self.message['latitude'] = self.latitude
@@ -98,10 +100,12 @@ class EnvironMessage(Message):
     """
     Environmental messge
     """
-    def __init__(self, temperature=None, humidity=None, barometric_pressure=None, lux=None):
+    def __init__(self, id=None, temperature=None, humidity=None,\
+                 barometric_pressure=None, lux=None):
 
         super(EnvironMessage, self).__init__()
 
+        self.id = id
         self.temperature = temperature
         self.humidity = humidity
         self.barometric_pressure = barometric_pressure
@@ -113,7 +117,8 @@ class EnvironMessage(Message):
         """
         self.message = super(EnvironMessage, self).to_dict()
 
-        self.message['sensor'] = 'Environment'
+        if self.id:
+            self.message['sensorId'] = self.id
 
         if self.temperature:
             self.message['temperature'] = round(self.temperature, 2)
@@ -133,15 +138,15 @@ class AliveMessage(Message):
     """
     Alive message
     """
-    def __init__(self, device_id=None, application_id=None):
+    def __init__(self, customer=None, device_id=None):
 
         """
         Initialize Alive message
         """
         super(AliveMessage, self).__init__()
 
+        self.customer = customer
         self.device_id = device_id
-        self.application_id = application_id
 
     def to_dict(self):
         """
@@ -149,8 +154,8 @@ class AliveMessage(Message):
         """
         self.message = super(AliveMessage, self).to_dict()
 
-        self.message['dev_id'] = self.device_id
-        self.message['app_id'] = self.application_id
+        self.message['customer'] = self.customer
+        self.message['devId'] = self.device_id
         self.message['time'] = time.time()
 
         return self.message
@@ -160,15 +165,15 @@ class AWSMessage(Message):
     AWS message to send
     """
 
-    def __init__(self, device_id=None, application_id=None, \
+    def __init__(self, customer=None, device_id=None,\
                  environ_message=None, gps_message=None, beacons=None, tags=None):
         """
         Initialize AWS message
         """
         super(AWSMessage, self).__init__()
 
+        self.customer = customer
         self.device_id = device_id
-        self.application_id = application_id
         self.environ_message = environ_message
         self.gps_message = gps_message
         self.beacons = beacons
@@ -180,8 +185,8 @@ class AWSMessage(Message):
         """
         self.message = super(AWSMessage, self).to_dict()
 
-        self.message['dev_id'] = self.device_id
-        self.message['app_id'] = self.application_id
+        self.message['customer'] = self.customer
+        self.message['devId'] = self.device_id
         self.message['time'] = time.time()
 
         self.message['sensors'] = list()

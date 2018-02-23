@@ -20,7 +20,7 @@
 # pylint: disable=E0401,C0103,R0903
 
 """
-Yeezz Core Network Library
+InnovateNow Core Network Library
 """
 
 import logging

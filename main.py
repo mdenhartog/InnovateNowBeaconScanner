@@ -20,7 +20,7 @@
 # pylint: disable=E0401,E1101,W0703,C0411,C0103,E1205
 
 """
-Yeezz Beacon Scanner program
+InnovateNow Beacon Scanner program
 
 Steps
 --------------------------------------------
@@ -35,7 +35,7 @@ Steps
 ---------------------------------------------
 Next version items
 ---------------------------------------------
-9. Retrieve messages from AWS Yeezz IoT Enviroment for this device
+9. Retrieve messages from AWS IoT Environment for this device
 10. Check for OTA updates (once a day)
 """
 
@@ -48,13 +48,13 @@ import sys
 import time
 
 from version import VERSION
-from yznetwork import WLANNetwork, NTP
-from yzaws import AWS
-from yzble import Scanner
-from yzmsg import AliveMessage, GPSMessage, EnvironMessage, AWSMessage
-from yzgps import GPS, DEFAULT_RX_PIN, DEFAULT_TX_PIN
-from yzenvsensor import Environment
-from yztimer import ResetTimer
+from innetwork import WLANNetwork, NTP
+from inaws import AWS
+from inble import Scanner
+from inmsg import AliveMessage, GPSMessage, EnvironMessage, AWSMessage
+from ingps import GPS, DEFAULT_RX_PIN, DEFAULT_TX_PIN
+from inenvsensor import Environment
+from intimer import ResetTimer
 
 # Initialize logging
 try:
@@ -67,7 +67,7 @@ logger = logging.getLogger(__name__)
 # Led orange
 pycom.rgbled(config.LED_COLOR_WARNING)
 
-logger.info('Start Yeezz Beacon Scanner version {}', VERSION)
+logger.info('Start InnovateNow Beacon Scanner version {}', VERSION)
 logger.debug('Memory allocated: ' + str(gc.mem_alloc()) + ' ,free: ' + str(gc.mem_free()))
 
 # Set watchdog 5min
@@ -102,7 +102,7 @@ try:
 
     # Publish alive message
     logger.info('Publish device alive message')
-    aliveMsg = AliveMessage(config.DEVICE_ID, config.APPLICATION_ID)
+    aliveMsg = AliveMessage(config.DEVICE_ID)
     aws.publish(aliveMsg.to_dict())
 
     wdt.feed() # Feed
@@ -159,8 +159,8 @@ try:
                                  barometric_pressure=environ.barometric_pressure,
                                  lux=environ.lux)
 
-        aws_msg = AWSMessage(device_id=config.DEVICE_ID,
-                             application_id=config.APPLICATION_ID,
+        aws_msg = AWSMessage(customer=config.CUSTOMER,
+                             device_id=config.DEVICE_ID,
                              environ_message=env_msg.to_dict(),
                              gps_message=gps_msg.to_dict(),
                              beacons=scanner.beacons,

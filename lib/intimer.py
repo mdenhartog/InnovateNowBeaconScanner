@@ -20,7 +20,7 @@
 # pylint: disable=E0401,R0903,R0201,C0103
 
 """
-Yeezz timer module
+InnovateNow timer module
 """
 import sys
 import logging

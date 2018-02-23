@@ -20,7 +20,7 @@
 # pylint: disable=R0913
 
 """
-Yeezz version settings
+InnovateNow version settings
 """
 
 VERSION = '1.0.0'

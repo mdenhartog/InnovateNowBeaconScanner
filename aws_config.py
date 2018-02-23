@@ -18,7 +18,7 @@
 # THE SOFTWARE.
 
 """
-Yeezz Beacon Scanner AWS configuration settings
+ InnovateNow Beacon Scanner AWS configuration settings
 """
 
 from config import DEVICE_ID
@@ -30,7 +30,7 @@ AWS_IOT_HOST = "a3c6ugxemi0ejq.iot.eu-central-1.amazonaws.com"
 AWS_IOT_PORT = 8883
 
 # Topic to publish to
-AWS_IOT_TOPIC = "yzbeaconscanner"
+AWS_IOT_TOPIC = "beaconscanner"
 
 # Certificate
 AWS_IOT_CLIENT_CERT = "/flash/cert/certificate.pem.crt"
@@ -47,7 +47,7 @@ AWS_IOT_OFFLINE_QUEUE_SIZE = -1
 AWS_IOT_DRAINING_FREQ = 2
 AWS_IOT_CONN_DISCONN_TIMEOUT = 30
 AWS_IOT_MQTT_OPER_TIMEOUT = 10
-AWS_IOT_LAST_WILL_TOPIC = 'yzlastwillmessage'
+AWS_IOT_LAST_WILL_TOPIC = 'lastwillmessage'
 AWS_IOT_LAST_WILL_MSG = 'Last will of device [' + DEVICE_ID + ']'
 
 ####################### Shadow updater ########################

@@ -17,18 +17,18 @@
 # THE SOFTWARE.
 
 """
-Yeezz Beacon Scanner configuration settings
+InnovateNow Beacon Scanner configuration settings
 """
 import logging
 
 # Log level
 LOG_LEVEL = logging.INFO
 
-# Device identifier for Yeezz IoT environment
-DEVICE_ID = "DEV_BEACONSCANNER_1"
+# Customer
+CUSTOMER = "InnovateNow"
 
-# Application identifier for Yeezz IoT environment
-APPLICATION_ID = "YeezzBeaconScanner"
+# Device identifier for IoT environment
+DEVICE_ID = "DEV_BEACONSCANNER_1"
 
 # Serial Access
 # True for development set this parameter to False for production
@@ -40,8 +40,8 @@ DEVICE_RESET_AFTER_SECONDS = 7200
 # FTP Access
 # True for development set this parameter to False for production
 FTP_ACCESS = True
-FTP_USER = "Yeezz"
-FTP_PASSWORD = "123YEEZZ4567"
+FTP_USER = "InnovateNow"
+FTP_PASSWORD = "123IN4567890"
 
 # WLAN settings
 WLAN_SSID = "HARTOG_GUEST" # SSID to connect to

@@ -20,7 +20,7 @@
 # pylint: disable=R1702,C0103,E1101,E0401,W0703
 
 """
-Yeezz GPS sensor based on serial GPS modules:
+InnovateNow GPS sensor based on serial GPS modules:
     - Tested with UBlox NEO-6M (9600 Baud, 8 bits, no parity bit, 1 stop bit)
 
 Parsing of the NMEA sentences is done with the great micropyGPS library
