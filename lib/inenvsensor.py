@@ -20,14 +20,12 @@
 # pylint: disable=C0103,E0401
 
 """
-InnovateNow Environmental Sensor based on:
+InnovateNow Environment Sensor based on:
     - BME280 sensor for Temperature, Humidity and Barometric pressure
-    - TL2561 sensor for Light intensity in Lux
 """
 import logging
 import sys
 import bme280
-import tsl2561
 
 # Initialize logging
 try:
@@ -54,20 +52,12 @@ class Environment(object):
 
             logger.debug('I2C addresses [{}]', self.addresses)
             logger.debug('BME280 [{}]', bme280.BME280_I2CADDR)
-            logger.debug('TSL2561 [{}]', tsl2561.TSL2561_I2CADDR)
 
             self.bme280 = None
             if bme280.BME280_I2CADDR in self.addresses:
                 logger.info('Initialize Temperature, Humidity and Barometric sensor')
                 self.bme280 = bme280.BME280(address=bme280.BME280_I2CADDR,
                                             i2c=i2c) # default address 0x76
-
-            self.tsl2561 = None
-            if tsl2561.TSL2561_I2CADDR in self.addresses:
-                logger.info('Initialize Lux sensor')
-                self.tsl2561 = tsl2561.TSL2561(i2c=i2c) # default address 0x39
-                self.tsl2561.gain(16)
-                self.tsl2561.integration_time(402)
 
     @property
     def temperature(self):
@@ -86,9 +76,3 @@ class Environment(object):
         """Return the current barometric pressure in hPa"""
         if self.bme280:
             return self.bme280.pressure
-
-    @property
-    def lux(self):
-        """Return the current lux"""
-        if self.tsl2561:
-            return self.tsl2561.read()

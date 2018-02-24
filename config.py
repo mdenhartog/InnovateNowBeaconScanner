@@ -28,7 +28,7 @@ LOG_LEVEL = logging.INFO
 CUSTOMER = "InnovateNow"
 
 # Device identifier for IoT environment
-DEVICE_ID = "DEV_BEACONSCANNER_1"
+DEVICE_ID = "e3974fe0-18d9-11e8-9cfb-da0741d48d81"
 
 # Serial Access
 # True for development set this parameter to False for production
@@ -48,6 +48,9 @@ WLAN_SSID = "HARTOG_GUEST" # SSID to connect to
 WLAN_KEY = "1234567890"    # SSID key
 WLAN_INT_ANTENNA = True    # True internal antenna else False
 
+# Environmental sensor is the BME280 sensor (temp, humidity and barometric pressure)
+ENVIRONMENT_SENSOR_ID = "4c871008-18da-11e8-a5ea-96c32e02788c"
+
 # BLE scan time in seconds before sending the results to AWS
 # 240
 SCAN_TIME_IN_SECONDS = 240
@@ -55,6 +58,7 @@ SCAN_TIME_IN_SECONDS = 240
 # GPS is an optional sensor
 # When this setting is set to False you can add a fixed latitude/longitude
 GPS_AVAILABLE = True
+GPS_SENSOR_ID = "837ae7a6-18da-11e8-a5ea-96c32e02788c"
 GPS_FIXED_LATITUDE = None
 GPS_FIXED_LONGITUDE = None
 

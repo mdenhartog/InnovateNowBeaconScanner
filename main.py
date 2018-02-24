@@ -102,7 +102,7 @@ try:
 
     # Publish alive message
     logger.info('Publish device alive message')
-    aliveMsg = AliveMessage(config.DEVICE_ID)
+    aliveMsg = AliveMessage(customer=config.CUSTOMER, device_id=config.DEVICE_ID)
     aws.publish(aliveMsg.to_dict())
 
     wdt.feed() # Feed
@@ -144,7 +144,8 @@ try:
 
         # Construct messsages
         if config.GPS_AVAILABLE:
-            gps_msg = GPSMessage(latitude=gps.latitude,
+            gps_msg = GPSMessage(id=config.GPS_SENSOR_ID,
+                                 latitude=gps.latitude,
                                  longitude=gps.longitude,
                                  altitude=gps.altitude,
                                  speed=gps.speed(),
@@ -154,10 +155,10 @@ try:
             gps_msg = GPSMessage(latitude=config.GPS_FIXED_LATITUDE,
                                  longitude=config.GPS_FIXED_LONGITUDE)
 
-        env_msg = EnvironMessage(temperature=environ.temperature,
+        env_msg = EnvironMessage(id=config.ENVIRONMENT_SENSOR_ID,
+                                 temperature=environ.temperature,
                                  humidity=environ.humidity,
-                                 barometric_pressure=environ.barometric_pressure,
-                                 lux=environ.lux)
+                                 barometric_pressure=environ.barometric_pressure)
 
         aws_msg = AWSMessage(customer=config.CUSTOMER,
                              device_id=config.DEVICE_ID,

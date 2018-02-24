@@ -101,7 +101,7 @@ class EnvironMessage(Message):
     Environmental messge
     """
     def __init__(self, id=None, temperature=None, humidity=None,\
-                 barometric_pressure=None, lux=None):
+                 barometric_pressure=None):
 
         super(EnvironMessage, self).__init__()
 
@@ -109,7 +109,6 @@ class EnvironMessage(Message):
         self.temperature = temperature
         self.humidity = humidity
         self.barometric_pressure = barometric_pressure
-        self.lux = lux
 
     def to_dict(self):
         """
@@ -128,9 +127,6 @@ class EnvironMessage(Message):
 
         if self.barometric_pressure:
             self.message['barometricPressure'] = round(self.barometric_pressure, 0)
-
-        if self.lux:
-            self.message['lux'] = round(self.lux, 0)
 
         return self.message
 
