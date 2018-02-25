@@ -25,6 +25,7 @@ InnovateNow AWS library
 import logging
 import json
 import sys
+import socket
 
 import aws_config as awsconfig
 from MQTTLib import AWSIoTMQTTClient
@@ -74,7 +75,7 @@ class AWS(object):
             self.is_connected = True
             logger.info('AWS IoT connection succeeded')
         else:
-            raise IOError('AWS IoT connection failed')
+            raise socket.error('AWS IoT connection failed')
 
     def publish(self, msg=None):
         """
