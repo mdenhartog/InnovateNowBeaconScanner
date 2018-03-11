@@ -145,8 +145,8 @@ try:
         # Construct messsages
         if config.GPS_AVAILABLE:
             gps_msg = GPSMessage(id=config.GPS_SENSOR_ID,
-                                 latitude=gps.latitude,
-                                 longitude=gps.longitude,
+                                 latitude=gps.latitude[0],
+                                 longitude=gps.longitude[0],
                                  altitude=gps.altitude,
                                  speed=gps.speed(),
                                  course=gps.course,
