@@ -35,7 +35,7 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-class Scanner(object):
+class BLEScanner(object):
     """ BLE scanner for beacons and tags data packages """
 
     def __init__(self, max_list_items=25):

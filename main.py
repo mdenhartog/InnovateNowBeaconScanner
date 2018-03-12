@@ -50,7 +50,7 @@ import time
 from version import VERSION
 from innetwork import WLANNetwork, NTP
 from inaws import AWS
-from inble import Scanner
+from inble import BLEScanner
 from inmsg import AliveMessage, GPSMessage, EnvironMessage, AWSMessage
 from ingps import GPS, DEFAULT_RX_PIN, DEFAULT_TX_PIN
 from inenvsensor import Environment
@@ -119,7 +119,7 @@ try:
     environ = Environment(i2c)
 
     # Init scanner
-    scanner = Scanner(max_list_items=50)
+    scanner = BLEScanner(max_list_items=50)
 
     # Led off
     pycom.heartbeat(False)
