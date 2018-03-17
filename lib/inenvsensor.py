@@ -23,18 +23,12 @@
 InnovateNow Environment Sensor based on:
     - BME280 sensor for Temperature, Humidity and Barometric pressure
 """
-import logging
 import sys
 import bme280
 
 # Initialize logging
-try:
-    import config
-    logging.basicConfig(level=config.LOG_LEVEL, stream=sys.stdout)
-except ImportError:
-    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
-
-logger = logging.getLogger(__name__)
+import inlogging as logging
+log = logging.getLogger(__name__)
 
 class Environment(object):
     """
@@ -50,12 +44,12 @@ class Environment(object):
         if self.i2c:
             self.addresses = self.i2c.scan()
 
-            logger.debug('I2C addresses [{}]', self.addresses)
-            logger.debug('BME280 [{}]', bme280.BME280_I2CADDR)
+            log.debug('I2C addresses [{}]', self.addresses)
+            log.debug('BME280 [{}]', bme280.BME280_I2CADDR)
 
             self.bme280 = None
             if bme280.BME280_I2CADDR in self.addresses:
-                logger.info('Initialize Temperature, Humidity and Barometric sensor')
+                log.info('Initialize Temperature, Humidity and Barometric sensor')
                 self.bme280 = bme280.BME280(address=bme280.BME280_I2CADDR,
                                             i2c=i2c) # default address 0x76
 

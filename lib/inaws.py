@@ -22,7 +22,6 @@
 """
 InnovateNow AWS library
 """
-import logging
 import json
 import sys
 import socket
@@ -31,14 +30,8 @@ import aws_config as awsconfig
 from MQTTLib import AWSIoTMQTTClient
 
 # Initialize logging
-try:
-    import config
-    logging.basicConfig(level=config.LOG_LEVEL, stream=sys.stdout)
-except ImportError:
-    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
-
-logger = logging.getLogger(__name__)
-
+import inlogging as logging
+log = logging.getLogger(__name__)
 
 class AWS(object):
     """
@@ -73,7 +66,7 @@ class AWS(object):
         # Connect to MQTT Host
         if self.client.connect():
             self.is_connected = True
-            logger.info('AWS IoT connection succeeded')
+            log.info('AWS IoT connection succeeded')
         else:
             raise socket.error('AWS IoT connection failed')
 
@@ -81,7 +74,7 @@ class AWS(object):
         """
         Publish message
         """
-        logger.info('Publish [{}]', json.dumps(msg))
+        log.info('Publish [{}]', json.dumps(msg))
         self.client.publish(awsconfig.AWS_IOT_TOPIC, json.dumps(msg), 1)
 
     def disconnect(self):
@@ -90,6 +83,6 @@ class AWS(object):
         """
         if self.client:
             if self.client.disconnect():
-                logger.info('AWS IoT disconnected')
+                log.info('AWS IoT disconnected')
                 self.is_connected = False
                 self.client = None

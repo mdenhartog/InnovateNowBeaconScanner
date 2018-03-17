@@ -1,7 +1,3 @@
-# This module is heavily using code from the Adafruit library for the
-# BME280 sensor. This library is stripped to work with the PyCom Lopy
-# with a lot of other sensors.
-#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -41,7 +37,7 @@ _level_dict = {
 
 _stream = sys.stderr
 
-class Logger:
+class Logger(object):
 
     def __init__(self, name):
         self.level = NOTSET

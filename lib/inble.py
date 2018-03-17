@@ -22,18 +22,12 @@
 """ BLE scanner for beacons and tags """
 
 import binascii
-import logging
 import sys
 from network import Bluetooth
 
 # Initialize logging
-try:
-    import config
-    logging.basicConfig(level=config.LOG_LEVEL, stream=sys.stdout)
-except ImportError:
-    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
-
-logger = logging.getLogger(__name__)
+import inlogging as logging
+log = logging.getLogger(__name__)
 
 class BLEScanner(object):
     """ BLE scanner for beacons and tags data packages """
@@ -49,7 +43,7 @@ class BLEScanner(object):
     def start(self, timeout=-1):
         """ Start beacon scanning """
 
-        logger.info('Start scanning for beacons and tags')
+        log.info('Start scanning for beacons and tags')
         if self._ble is None:
             self._ble = Bluetooth()
 
@@ -59,7 +53,7 @@ class BLEScanner(object):
 
     def stop(self):
         """ Stop BLE """
-        logger.info('Stop scanning for beacons and tags')
+        log.info('Stop scanning for beacons and tags')
         if self._ble:
             self._ble.stop_scan()
             #self._ble.deinit()
@@ -71,7 +65,7 @@ class BLEScanner(object):
 
     def reset(self):
         """ Reset the retrieved beacon/tag list during scanning """
-        logger.info('Reset beacon/tag list')
+        log.info('Reset beacon/tag list')
         self._beacons[:] = []
         self._tags[:] = []
 
@@ -99,7 +93,7 @@ class BLEScanner(object):
                 tag = binitag.decode('UTF-8')
 
                 if tag not in self._tags:
-                    logger.debug('Found tag [{}]', tag)
+                    log.debug('Found tag [{}]', tag)
                     self._tags.append(tag)
 
             else:
@@ -114,5 +108,5 @@ class BLEScanner(object):
 
                     # Check if beacon is in list
                     if beacon not in self._beacons:
-                        logger.debug('Found beacon [{}]', beacon)
+                        log.debug('Found beacon [{}]', beacon)
                         self._beacons.append(beacon)

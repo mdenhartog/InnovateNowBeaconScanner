@@ -23,18 +23,11 @@
 InnovateNow timer module
 """
 import sys
-import logging
-
 import machine
 
 # Initialize logging
-try:
-    import config
-    logging.basicConfig(level=config.LOG_LEVEL, stream=sys.stdout)
-except ImportError:
-    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
-
-logger = logging.getLogger(__name__)
+import inlogging as logging
+log = logging.getLogger(__name__)
 
 class Timer(object):
     """
@@ -62,5 +55,5 @@ class ResetTimer(Timer):
         Reset the device
         """
         if alarm:
-            logger.info("Resetting the device...")
+            log.info("Resetting the device...")
             machine.reset()

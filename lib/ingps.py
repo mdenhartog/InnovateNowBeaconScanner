@@ -25,19 +25,14 @@ InnovateNow GPS sensor based on serial GPS modules:
 
 Parsing of the NMEA sentences is done with the great micropyGPS library
 """
-import logging
 import sys
 import time
+
 from micropygps import MicropyGPS
 
 # Initialize logging
-try:
-    import config
-    logging.basicConfig(level=config.LOG_LEVEL, stream=sys.stdout)
-except ImportError:
-    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
-
-logger = logging.getLogger(__name__)
+import inlogging as logging
+log = logging.getLogger(__name__)
 
 DEFAULT_TX_PIN = 'P3'
 DEFAULT_RX_PIN = 'P4'
@@ -63,7 +58,7 @@ class GPS(object):
         """
         Update the GPS values
         """
-        logger.info('Start reading the GPS values')
+        log.info('Start reading the GPS values')
         self.is_running = True
 
         if self.uart:
@@ -74,24 +69,24 @@ class GPS(object):
 
             while not segments_found and x < 4:
 
-                logger.debug('GPS loop counter [' + str(x) + ']')
+                log.debug('GPS loop counter [' + str(x) + ']')
                 if self.uart.any():
 
                     try:
 
                         read_bytes = self.uart.readall()
                         gps_string = read_bytes.decode("utf-8")
-                        logger.debug('GPS [{}]', gps_string)
+                        log.debug('GPS [{}]', gps_string)
 
                         for c in gps_string:
                             segment = self.parser.update(str(c))
                             if segment:
-                                logger.debug('Found segment [{}]', segment)
+                                log.debug('Found segment [{}]', segment)
                                 if segment not in self.segments_parsed:
                                     self.segments_parsed.append(segment)
 
                         # GPGSV, GPRMC, GPGSA, gpGGA, GPGLL, GPVTG
-                        logger.debug('Parsed segments [{}]', self.segments_parsed)
+                        log.debug('Parsed segments [{}]', self.segments_parsed)
                         if all(i in self.segments_parsed for i in GPS_SEGMENTS):
                             segments_found = True
                         else:
@@ -99,7 +94,7 @@ class GPS(object):
                             time.sleep(2) # Wait 2sec
 
                     except Exception as e:
-                        logger.error('IOError [{}]', e)
+                        log.error('IOError [{}]', e)
                         break
 
         self.is_running = False

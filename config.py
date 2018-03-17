@@ -19,7 +19,7 @@
 """
 InnovateNow Beacon Scanner configuration settings
 """
-import logging
+import inlogging as logging
 
 # Log level
 LOG_LEVEL = logging.INFO

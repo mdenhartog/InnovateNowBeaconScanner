@@ -23,20 +23,15 @@
 InnovateNow Core Network Library
 """
 
-import logging
 import sys
 import time
 import machine
+
 from network import WLAN
 
 # Initialize logging
-try:
-    import config
-    logging.basicConfig(level=config.LOG_LEVEL, stream=sys.stdout)
-except ImportError:
-    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
-
-logger = logging.getLogger(__name__)
+import inlogging as logging
+log = logging.getLogger(__name__)
 
 class WLANNetwork(object):
     """
@@ -63,7 +58,7 @@ class WLANNetwork(object):
         """
         Establish a WLAN connection to the specified SSID
         """
-        logger.info('Connect to WLAN [' + self.ssid + ']')
+        log.info('Connect to WLAN [' + self.ssid + ']')
 
         if self.wlan is None:
 
@@ -82,18 +77,18 @@ class WLANNetwork(object):
                         machine.idle() # Save power while waiting
 
                     self.wlan = wlan
-                    logger.debug("ipconfig:" + str(self.wlan.ifconfig()))
+                    log.debug("ipconfig:" + str(self.wlan.ifconfig()))
                     break
 
             if self.wlan is None:
-                logger.error('Error establishing connection to wlan [' + self.ssid + ']')
+                log.error('Error establishing connection to wlan [' + self.ssid + ']')
                 raise IOError('Network connection to wlan [' + self.ssid + '] failed')
 
     def disconnect(self):
         """
         Disconnect the WLAN
         """
-        logger.info('Disconnect from WLAN [' + self.ssid + ']')
+        log.info('Disconnect from WLAN [' + self.ssid + ']')
 
         if self.wlan:
             if self.wlan.isconnected():

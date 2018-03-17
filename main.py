@@ -57,18 +57,20 @@ from inenvsensor import Environment
 from intimer import ResetTimer
 
 # Initialize logging
+# Initialize logging
+import inlogging as logging
 try:
     logging.basicConfig(level=config.LOG_LEVEL, stream=sys.stdout)
 except ImportError:
     logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 # Led orange
 pycom.rgbled(config.LED_COLOR_WARNING)
 
-logger.info('Start InnovateNow Beacon Scanner version {}', VERSION)
-logger.debug('Memory allocated: ' + str(gc.mem_alloc()) + ' ,free: ' + str(gc.mem_free()))
+log.info('Start InnovateNow Beacon Scanner version {}', VERSION)
+log.debug('Memory allocated: ' + str(gc.mem_alloc()) + ' ,free: ' + str(gc.mem_free()))
 
 # Set watchdog 5min
 wdt = machine.WDT(timeout=300000)
@@ -80,28 +82,28 @@ if config.DEVICE_RESET_AFTER_SECONDS:
 try:
 
     # Start network
-    logger.info('Start WLAN network [{}]', config.WLAN_SSID)
+    log.info('Start WLAN network [{}]', config.WLAN_SSID)
     network = WLANNetwork(ssid=config.WLAN_SSID, key=config.WLAN_KEY)
     network.connect()
 
     wdt.feed() # Feed
 
     # Sync correct time with NTP
-    logger.info('Sync time with NTP')
+    log.info('Sync time with NTP')
     ntp = NTP(ntp_pool_server=config.NTP_POOL_SERVER)
     ntp.sync()
 
     wdt.feed() # Feed
 
     # Connect to AWS
-    logger.info('Start connection AWS IoT')
+    log.info('Start connection AWS IoT')
     aws = AWS()
     aws.connect()
 
     wdt.feed() # Feed
 
     # Publish alive message
-    logger.info('Publish device alive message')
+    log.info('Publish device alive message')
     aliveMsg = AliveMessage(customer=config.CUSTOMER, device_id=config.DEVICE_ID)
     aws.publish(aliveMsg.to_dict())
 
@@ -126,7 +128,7 @@ try:
 
     while True:
 
-        logger.debug('Memory allocated: ' + str(gc.mem_alloc()) + ' ,free: ' + str(gc.mem_free()))
+        log.debug('Memory allocated: ' + str(gc.mem_alloc()) + ' ,free: ' + str(gc.mem_free()))
 
         wdt.feed() # Feed
 
@@ -187,7 +189,7 @@ try:
 
 except Exception as e:
     pycom.rgbled(config.LED_COLOR_ERROR)
-    logger.error('Unexpected error {}', e)
+    log.error('Unexpected error {}', e)
 
     if aws:
         aws.disconnect()
