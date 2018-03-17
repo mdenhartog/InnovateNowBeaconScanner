@@ -31,7 +31,7 @@ Steps
 5. Scan for Beacons / Tags for the specified amount of time
 6. Initialize GPS
 7. Initialize Environment sensor
-8. Send message to AWS Yeezz IoT Environment
+8. Send message to AWS InnovateNow Environment
 ---------------------------------------------
 Next version items
 ---------------------------------------------
@@ -39,7 +39,6 @@ Next version items
 10. Check for OTA updates (once a day)
 """
 
-import logging
 import machine
 import config
 import pycom
@@ -52,11 +51,10 @@ from innetwork import WLANNetwork, NTP
 from inaws import AWS
 from inble import BLEScanner
 from inmsg import AliveMessage, GPSMessage, EnvironMessage, AWSMessage
-from ingps import GPS, DEFAULT_RX_PIN, DEFAULT_TX_PIN
+from ingps import GPS
 from inenvsensor import Environment
 from intimer import ResetTimer
 
-# Initialize logging
 # Initialize logging
 import inlogging as logging
 try:
@@ -111,13 +109,18 @@ try:
 
     # Init gps
     if config.GPS_AVAILABLE:
-        uart = machine.UART(1, pins=(DEFAULT_TX_PIN, DEFAULT_RX_PIN), baudrate=9600)
+        uart = machine.UART(1, pins=(config.GPS_TX_PIN, config.GPS_RX_PIN), baudrate=9600)
         gps = GPS(uart=uart)
 
-    # Init I2C
-    i2c = machine.I2C(0, machine.I2C.MASTER, baudrate=400000)
-
+    
     # Init environment sensors
+    if config.ENVIRONMENT_I2C_SDA and config.ENVIRONMENT_I2C_SCL:
+        i2c = machine.I2C(config.ENVIRONMENT_I2C_BUS, machine.I2C.MASTER, 
+                          baudrate=400000, 
+                          pins=(config.ENVIRONMENT_I2C_SDA, config.ENVIRONMENT_I2C_SCL))
+    else:
+        i2c = machine.I2C(config.ENVIRONMENT_I2C_BUS, machine.I2C.MASTER, baudrate=400000)        
+
     environ = Environment(i2c)
 
     # Init scanner

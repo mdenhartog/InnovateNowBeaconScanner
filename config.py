@@ -49,7 +49,10 @@ WLAN_KEY = "1234567890"    # SSID key
 WLAN_INT_ANTENNA = True    # True internal antenna else False
 
 # Environmental sensor is the BME280 sensor (temp, humidity and barometric pressure)
-ENVIRONMENT_SENSOR_ID = "4c871008-18da-11e8-a5ea-96c32e02788c"
+ENVIRONMENT_SENSOR_ID = '4c871008-18da-11e8-a5ea-96c32e02788c'
+ENVIRONMENT_I2C_BUS = 0
+ENVIRONMENT_I2C_SDA = None
+ENVIRONMENT_I2C_SCL = None
 
 # BLE scan time in seconds before sending the results to AWS
 # 240
@@ -58,7 +61,9 @@ SCAN_TIME_IN_SECONDS = 240
 # GPS is an optional sensor
 # When this setting is set to False you can add a fixed latitude/longitude
 GPS_AVAILABLE = True
-GPS_SENSOR_ID = "837ae7a6-18da-11e8-a5ea-96c32e02788c"
+GPS_SENSOR_ID = '837ae7a6-18da-11e8-a5ea-96c32e02788c'
+GPS_TX_PIN = 'P3'
+GPS_RX_PIN = 'P4'
 GPS_FIXED_LATITUDE = None
 GPS_FIXED_LONGITUDE = None
 

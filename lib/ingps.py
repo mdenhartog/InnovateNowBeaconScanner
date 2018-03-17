@@ -20,13 +20,12 @@
 # pylint: disable=R1702,C0103,E1101,E0401,W0703
 
 """
-InnovateNow GPS sensor based on serial GPS modules:
-    - Tested with UBlox NEO-6M (9600 Baud, 8 bits, no parity bit, 1 stop bit)
-
-Parsing of the NMEA sentences is done with the great micropyGPS library
+InnovateNow GPS sensor based on serial or i2c GPS modules with NMEA support.
+Parsing of the NMEA sentences is done with the micropyGPS library.
 """
 import sys
 import time
+from machine import Timer
 
 from micropygps import MicropyGPS
 
@@ -34,26 +33,106 @@ from micropygps import MicropyGPS
 import inlogging as logging
 log = logging.getLogger(__name__)
 
-DEFAULT_TX_PIN = 'P3'
-DEFAULT_RX_PIN = 'P4'
+# Quectel L76-L address
+GPS_I2CADDR = 0x10
 
-# GPS_SEGMENTS = ['GPGSV', 'GPRMC', 'GPGSA', 'GPGGA', 'GPGLL', 'GPVTG']
-GPS_SEGMENTS = ['GPRMC', 'GPGGA']
+SUPPORTED_GPS_SEGMENTS = ['GPGSV', 'GPRMC', 'GPGSA', 'GPGGA', 'GPGLL', 'GPVTG']
+
+class DataReader(object):
+    """ 
+    Class for reading the gps data via uart
+    """
+    def __init__(self):
+        self.__finished = False
+        self.data = ''
+        
+    def start(self, i2c=None, uart=None, timeout=5, gps_segments=SUPPORTED_GPS_SEGMENTS):
+        """ 
+        Start reading GPS data 
+        """
+        log.debug('Start reading the data')
+
+        segments_parsed = []
+        self.__finished = False
+
+        """ 
+        Write 1 byte to register to start sending data 
+        """
+        if i2c:
+            log.debug('Wake up GPS device')            
+            self.i2c.writeto(GPS_I2CADDR, self.data)
+
+        Timer.Alarm(handler=self.__stop, s=timeout)
+        while (not self.__finished):
+            ret_data = None
+            
+            if i2c:
+                ret_data = self.__i2c_read_data(i2c)
+            if uart:   
+                ret_data = self.__uart_read_data(uart)
+            
+            # Process the data read
+            if ret_data:
+                data_str = ret_data.decode("utf-8")
+                data_array = data_str.split('$')
+                
+                log.debug('Read data: ' + str(data_array))
+
+                # Process the data item
+                for data_item in data_array:
+                    # Add $ and remove \r\n
+                    data_item = '$' + data_item.rstrip('\r\n')        
+                             
+                    log.debug('Process [' + data_item + ']')           
+                    if data_item.find('$GP') > -1 and data_item.find('*') > -1:
+                        
+                        # Get segment and check if it has been already seen
+                        segment = data_item.split(',')[0].lstrip('$')
+                        log.debug('Segment [' + segment + '] found')
+
+                        if not segment in segments_parsed:
+                            segments_parsed.append(segment)
+                            self.data = self.data + data_item
+                            
+                        if all(i in segments_parsed for i in gps_segments):
+                            self.__finished = True
+                        else:
+                            time.sleep_ms(2)    
+ 
+    def __uart_read_data(self, uart):
+        """
+        Read the data via UART
+        """
+        return uart.readall()
+        
+    def __i2c_read_data(self, i2c):
+        """
+        Read the data via i2c (255 bytes)
+        """
+        return self.i2c.readfrom(GPS_I2CADDR, 255)
+        
+    def __stop(self, alarm):
+        if alarm:
+            log.debug('Data reader timeout')
+            self.__finished = True
+
 
 class GPS(object):
     """
-    Class for getting the gps data via the serial bus.
+    Class for retrieving and processing the GPS data
     """
 
-    def __init__(self, uart=None):
+    def __init__(self, i2c=None, uart=None, timeout=5, gps_segments=SUPPORTED_GPS_SEGMENTS):
         """
         Initialize the GPS module on the specified portions
         """
-        self.uart = uart
-        self.parser = MicropyGPS(location_formatting='dd')
+        self.__uart = uart
+        self.__i2c = i2c
+        self.__parser = MicropyGPS(location_formatting='dd')
         self.is_running = False
-        self.segments_parsed = []
-
+        self.__timeout = timeout # Data reader timeout in seconds
+        self.__gps_segments = gps_segments
+    
     def update(self):
         """
         Update the GPS values
@@ -61,41 +140,12 @@ class GPS(object):
         log.info('Start reading the GPS values')
         self.is_running = True
 
-        if self.uart:
+        datareader = DataReader()
+        datareader.start(i2c=self.__i2c, uart=self.__uart, timeout=self.__timeout,
+                         gps_segments=self.__gps_segments)
 
-            self.segments_parsed [:] = []
-            segments_found = False
-            x = 0
-
-            while not segments_found and x < 4:
-
-                log.debug('GPS loop counter [' + str(x) + ']')
-                if self.uart.any():
-
-                    try:
-
-                        read_bytes = self.uart.readall()
-                        gps_string = read_bytes.decode("utf-8")
-                        log.debug('GPS [{}]', gps_string)
-
-                        for c in gps_string:
-                            segment = self.parser.update(str(c))
-                            if segment:
-                                log.debug('Found segment [{}]', segment)
-                                if segment not in self.segments_parsed:
-                                    self.segments_parsed.append(segment)
-
-                        # GPGSV, GPRMC, GPGSA, gpGGA, GPGLL, GPVTG
-                        log.debug('Parsed segments [{}]', self.segments_parsed)
-                        if all(i in self.segments_parsed for i in GPS_SEGMENTS):
-                            segments_found = True
-                        else:
-                            x += 1
-                            time.sleep(2) # Wait 2sec
-
-                    except Exception as e:
-                        log.error('IOError [{}]', e)
-                        break
+        for c in datareader.data:
+            self.__parser.update(str(c))
 
         self.is_running = False
 
@@ -104,24 +154,24 @@ class GPS(object):
         """
         Return latitude
         """
-        return self.parser.latitude
+        return self.__parser.latitude
 
     @property
     def longitude(self):
         """
         Return longitude
         """
-        return self.parser.longitude
+        return self.__parser.longitude
 
     @property
     def timestamp_utc(self):
         """ Return timestamp """
-        return "20{0}-{1:02d}-{2:02d}T{3:02d}:{4:02d}:{5:.0f}Z".format(self.parser.date[2],
-                                                                       self.parser.date[1],
-                                                                       self.parser.date[0],
-                                                                       self.parser.timestamp[0],
-                                                                       self.parser.timestamp[1],
-                                                                       self.parser.timestamp[2])
+        return "20{0}-{1:02d}-{2:02d}T{3:02d}:{4:02d}:{5:.0f}Z".format(self.__parser.date[2],
+                                                                       self.__parser.date[1],
+                                                                       self.__parser.date[0],
+                                                                       self.__parser.timestamp[0],
+                                                                       self.__parser.timestamp[1],
+                                                                       self.__parser.timestamp[2])
 
     def speed(self, unit='kph'):
         """
@@ -132,24 +182,24 @@ class GPS(object):
         """
 
         if unit == 'mph':
-            return self.parser.speed[1]
+            return self.__parser.speed[1]
 
         if unit == 'knot':
-            return self.parser.speed[0]
+            return self.__parser.speed[0]
 
-        return self.parser.speed[2]
+        return self.__parser.speed[2]
 
     @property
     def altitude(self):
         """ Altitude """
-        return self.parser.altitude
+        return self.__parser.altitude
 
     @property
     def course(self):
         """ Actual course """
-        return self.parser.course
+        return self.__parser.course
 
     @property
     def direction(self):
         """ Direction """
-        return self.parser.compass_direction()
+        return self.__parser.compass_direction()
