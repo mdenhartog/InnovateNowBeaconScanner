@@ -125,6 +125,7 @@ try:
             i2c = machine.I2C(config.SENSOR_I2C_BUS,
                               machine.I2C.MASTER,
                               pins=(config.SENSOR_I2C_SDA_PIN, config.SENSOR_I2C_SCL_PIN))
+            log.info('I2C addresses available [{}]', i2c.scan())
         gps = GPS(i2c=i2c)
 
     # Init environmental sensors
@@ -137,8 +138,9 @@ try:
             i2c = machine.I2C(config.SENSOR_I2C_BUS,
                               machine.I2C.MASTER,
                               pins=(config.SENSOR_I2C_SDA_PIN, config.SENSOR_I2C_SCL_PIN))
+            log.info('I2C addresses available [{}]', i2c.scan())
 
-        environ = Environment(i2c)
+        environ = Environment(i2c=i2c)
 
     # Init scanner
     scanner = BLEScanner(max_list_items=50)

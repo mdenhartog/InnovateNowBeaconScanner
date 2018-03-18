@@ -17,13 +17,12 @@
 # THE SOFTWARE.
 
 # Linter
-# pylint: disable=C0103,E0401
+# pylint: disable=C0103,E0401,R1710
 
 """
 InnovateNow Environment Sensor based on:
     - BME280 sensor for Temperature, Humidity and Barometric pressure
 """
-import sys
 import bme280
 
 # Initialize logging
@@ -44,8 +43,8 @@ class Environment(object):
         if self.i2c:
             self.addresses = self.i2c.scan()
 
-            log.debug('I2C addresses [{}]', self.addresses)
-            log.debug('BME280 [{}]', bme280.BME280_I2CADDR)
+            # log.info('I2C addresses [{}]', self.addresses)
+            log.info('BME280 [{}]', bme280.BME280_I2CADDR)
 
             self.bme280 = None
             if bme280.BME280_I2CADDR in self.addresses:
