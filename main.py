@@ -65,6 +65,7 @@ except ImportError:
 log = logging.getLogger(__name__)
 
 # Led orange
+pycom.heartbeat(False)
 pycom.rgbled(config.LED_COLOR_WARNING)
 
 log.info('Start InnovateNow Beacon Scanner version {}', VERSION)
@@ -108,20 +109,36 @@ try:
     wdt.feed() # Feed
 
     # Init gps
-    if config.GPS_AVAILABLE:
-        uart = machine.UART(1, pins=(config.GPS_TX_PIN, config.GPS_RX_PIN), baudrate=9600)
+    gps = None
+    i2c = None
+    if config.GPS_AVAILABLE and config.GPS_PORT == 'UART':
+        log.info('Initialize GPS via Serial')
+        uart = machine.UART(1, pins=(config.GPS_UART_TX_PIN, config.GPS_UART_RX_PIN), baudrate=9600)
         gps = GPS(uart=uart)
 
-    
-    # Init environment sensors
-    if config.ENVIRONMENT_I2C_SDA and config.ENVIRONMENT_I2C_SCL:
-        i2c = machine.I2C(config.ENVIRONMENT_I2C_BUS, machine.I2C.MASTER, 
-                          baudrate=400000, 
-                          pins=(config.ENVIRONMENT_I2C_SDA, config.ENVIRONMENT_I2C_SCL))
-    else:
-        i2c = machine.I2C(config.ENVIRONMENT_I2C_BUS, machine.I2C.MASTER, baudrate=400000)        
+    if config.GPS_AVAILABLE and config.GPS_PORT == 'I2C':
+        log.info('Initialize GPS via I2C on bus ' +
+                 str(config.SENSOR_I2C_BUS) + ' and pins (' + config.SENSOR_I2C_SDA_PIN +
+                 ',' + config.SENSOR_I2C_SCL_PIN + ')')
 
-    environ = Environment(i2c)
+        if not i2c:
+            i2c = machine.I2C(config.SENSOR_I2C_BUS,
+                              machine.I2C.MASTER,
+                              pins=(config.SENSOR_I2C_SDA_PIN, config.SENSOR_I2C_SCL_PIN))
+        gps = GPS(i2c=i2c)
+
+    # Init environmental sensors
+    if config.ENVIRONMENT_SENSOR_AVAILABLE:
+        log.info('Initialize Environmental sensor via I2C via bus ' +
+                 str(config.SENSOR_I2C_BUS) + ' and pins (' + config.SENSOR_I2C_SDA_PIN +
+                 ',' + config.SENSOR_I2C_SCL_PIN + ')')
+
+        if not i2c:
+            i2c = machine.I2C(config.SENSOR_I2C_BUS,
+                              machine.I2C.MASTER,
+                              pins=(config.SENSOR_I2C_SDA_PIN, config.SENSOR_I2C_SCL_PIN))
+
+        environ = Environment(i2c)
 
     # Init scanner
     scanner = BLEScanner(max_list_items=50)
@@ -148,6 +165,7 @@ try:
         wdt.feed() # Feed
 
         # Construct messsages
+        gps_msg = GPSMessage()
         if config.GPS_AVAILABLE:
             gps_msg = GPSMessage(id=config.GPS_SENSOR_ID,
                                  latitude=gps.latitude[0],
@@ -160,10 +178,12 @@ try:
             gps_msg = GPSMessage(latitude=config.GPS_FIXED_LATITUDE,
                                  longitude=config.GPS_FIXED_LONGITUDE)
 
-        env_msg = EnvironMessage(id=config.ENVIRONMENT_SENSOR_ID,
-                                 temperature=environ.temperature,
-                                 humidity=environ.humidity,
-                                 barometric_pressure=environ.barometric_pressure)
+        env_msg = EnvironMessage()
+        if config.ENVIRONMENT_SENSOR_AVAILABLE:
+            env_msg = EnvironMessage(id=config.ENVIRONMENT_SENSOR_ID,
+                                     temperature=environ.temperature,
+                                     humidity=environ.humidity,
+                                     barometric_pressure=environ.barometric_pressure)
 
         aws_msg = AWSMessage(customer=config.CUSTOMER,
                              device_id=config.DEVICE_ID,

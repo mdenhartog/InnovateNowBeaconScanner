@@ -15,6 +15,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+#
+# pylint: disable=E0401
 
 """
 InnovateNow Beacon Scanner configuration settings
@@ -48,22 +50,26 @@ WLAN_SSID = "HARTOG_GUEST" # SSID to connect to
 WLAN_KEY = "1234567890"    # SSID key
 WLAN_INT_ANTENNA = True    # True internal antenna else False
 
-# Environmental sensor is the BME280 sensor (temp, humidity and barometric pressure)
-ENVIRONMENT_SENSOR_ID = '4c871008-18da-11e8-a5ea-96c32e02788c'
-ENVIRONMENT_I2C_BUS = 0
-ENVIRONMENT_I2C_SDA = None
-ENVIRONMENT_I2C_SCL = None
-
 # BLE scan time in seconds before sending the results to AWS
 # 240
 SCAN_TIME_IN_SECONDS = 240
+
+# Sensor I2C ENVIRONMENT_I2C_BUS
+SENSOR_I2C_BUS = 0
+SENSOR_I2C_SDA_PIN = 'P22'
+SENSOR_I2C_SCL_PIN = 'P21'
+
+# Environmental sensor is the BME280 sensor (temp, humidity and barometric pressure)
+ENVIRONMENT_SENSOR_AVAILABLE = True
+ENVIRONMENT_SENSOR_ID = '4c871008-18da-11e8-a5ea-96c32e02788c'
 
 # GPS is an optional sensor
 # When this setting is set to False you can add a fixed latitude/longitude
 GPS_AVAILABLE = True
 GPS_SENSOR_ID = '837ae7a6-18da-11e8-a5ea-96c32e02788c'
-GPS_TX_PIN = 'P3'
-GPS_RX_PIN = 'P4'
+GPS_PORT = 'I2C'   # I2C or UART
+GPS_UART_TX_PIN = 'P3'
+GPS_UART_RX_PIN = 'P4'
 GPS_FIXED_LATITUDE = None
 GPS_FIXED_LONGITUDE = None
 

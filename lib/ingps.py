@@ -23,7 +23,6 @@
 InnovateNow GPS sensor based on serial or i2c GPS modules with NMEA support.
 Parsing of the NMEA sentences is done with the micropyGPS library.
 """
-import sys
 import time
 from machine import Timer
 
@@ -39,53 +38,53 @@ GPS_I2CADDR = 0x10
 SUPPORTED_GPS_SEGMENTS = ['GPGSV', 'GPRMC', 'GPGSA', 'GPGGA', 'GPGLL', 'GPVTG']
 
 class DataReader(object):
-    """ 
+    """
     Class for reading the gps data via uart
     """
     def __init__(self):
         self.__finished = False
         self.data = ''
-        
+
     def start(self, i2c=None, uart=None, timeout=5, gps_segments=SUPPORTED_GPS_SEGMENTS):
-        """ 
-        Start reading GPS data 
+        """
+        Start reading GPS data
         """
         log.debug('Start reading the data')
 
         segments_parsed = []
         self.__finished = False
 
-        """ 
-        Write 1 byte to register to start sending data 
+        """
+        Write 1 byte to register to start sending data
         """
         if i2c:
-            log.debug('Wake up GPS device')            
-            self.i2c.writeto(GPS_I2CADDR, self.data)
+            log.debug('Wake up GPS device')
+            i2c.writeto(GPS_I2CADDR, self.data)
 
         Timer.Alarm(handler=self.__stop, s=timeout)
-        while (not self.__finished):
+        while not self.__finished:
             ret_data = None
-            
+
             if i2c:
                 ret_data = self.__i2c_read_data(i2c)
-            if uart:   
+            if uart:
                 ret_data = self.__uart_read_data(uart)
-            
+
             # Process the data read
             if ret_data:
                 data_str = ret_data.decode("utf-8")
                 data_array = data_str.split('$')
-                
+
                 log.debug('Read data: ' + str(data_array))
 
                 # Process the data item
                 for data_item in data_array:
                     # Add $ and remove \r\n
-                    data_item = '$' + data_item.rstrip('\r\n')        
-                             
-                    log.debug('Process [' + data_item + ']')           
+                    data_item = '$' + data_item.rstrip('\r\n')
+
+                    log.debug('Process [' + data_item + ']')
                     if data_item.find('$GP') > -1 and data_item.find('*') > -1:
-                        
+
                         # Get segment and check if it has been already seen
                         segment = data_item.split(',')[0].lstrip('$')
                         log.debug('Segment [' + segment + '] found')
@@ -93,24 +92,24 @@ class DataReader(object):
                         if not segment in segments_parsed:
                             segments_parsed.append(segment)
                             self.data = self.data + data_item
-                            
+
                         if all(i in segments_parsed for i in gps_segments):
                             self.__finished = True
                         else:
-                            time.sleep_ms(2)    
- 
+                            time.sleep_ms(2)
+
     def __uart_read_data(self, uart):
         """
         Read the data via UART
         """
         return uart.readall()
-        
+
     def __i2c_read_data(self, i2c):
         """
         Read the data via i2c (255 bytes)
         """
-        return self.i2c.readfrom(GPS_I2CADDR, 255)
-        
+        return i2c.readfrom(GPS_I2CADDR, 255)
+
     def __stop(self, alarm):
         if alarm:
             log.debug('Data reader timeout')
@@ -132,7 +131,7 @@ class GPS(object):
         self.is_running = False
         self.__timeout = timeout # Data reader timeout in seconds
         self.__gps_segments = gps_segments
-    
+
     def update(self):
         """
         Update the GPS values
