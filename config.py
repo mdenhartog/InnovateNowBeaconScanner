@@ -73,6 +73,11 @@ GPS_UART_RX_PIN = 'P4'
 GPS_FIXED_LATITUDE = None
 GPS_FIXED_LONGITUDE = None
 
+# Distance greater than last coords in NVRAM use the stored values
+# Device should be static this rule will help to stabilize the coordinates
+# when gps is activated on board
+GPS_COORD_DIFF_UPDATE_RULE = 25 # meters
+
 # NTP for setting the correct time
 NTP_POOL_SERVER = "nl.pool.ntp.org"
 

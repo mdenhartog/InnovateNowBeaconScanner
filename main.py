@@ -54,6 +54,12 @@ from inmsg import AliveMessage, GPSMessage, EnvironMessage, AWSMessage
 from ingps import GPS
 from inenvsensor import Environment
 from intimer import ResetTimer
+from haversine import Haversine
+
+# Latitude / Longitude 
+cur_lat = None
+cur_lon = None
+location_counter = 0
 
 # Initialize logging
 import inlogging as logging
@@ -168,14 +174,36 @@ try:
 
         # Construct messsages
         gps_msg = GPSMessage()
-        if config.GPS_AVAILABLE:
+        if config.GPS_AVAILABLE:   
+
+            new_lat = gps.latitude[0]
+            new_lon = gps.longitude[0]
+
+            # Calc distance
+            if gps.coords_valid:
+                distance = 0                
+                if cur_lat and cur_lon:
+                    distance = Haversine([cur_lat,cur_lon], [new_lat,new_lon]).meters
+                    log.debug('Distance: ' + str(distance))
+
+                # Check distance
+                # When the distance is often to far off. Use the new coordinates
+                if distance < config.GPS_COORD_DIFF_UPDATE_RULE or location_counter > 5:  
+                    log.debug('Using the new coordinates')   
+                    location_counter = 0                   
+                    cur_lat = new_lat
+                    cur_lon = new_lon
+                else:
+                    location_counter = location_counter + 1   
+
             gps_msg = GPSMessage(id=config.GPS_SENSOR_ID,
-                                 latitude=gps.latitude[0],
-                                 longitude=gps.longitude[0],
+                                 latitude=cur_lat,
+                                 longitude=cur_lon,
                                  altitude=gps.altitude,
                                  speed=gps.speed(),
                                  course=gps.course,
                                  direction=gps.direction)
+
         else:
             gps_msg = GPSMessage(latitude=config.GPS_FIXED_LATITUDE,
                                  longitude=config.GPS_FIXED_LONGITUDE)

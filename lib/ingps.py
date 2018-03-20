@@ -17,15 +17,20 @@
 # THE SOFTWARE.
 
 # Linter
-# pylint: disable=R1702,C0103,E1101,E0401,W0703
+# pylint: disable=R1702,C0103,E1101,E0401,W0703,W0102
 
 """
-InnovateNow GPS sensor based on serial or i2c GPS modules with NMEA support.
+InnovateNow GPS sensor based on serial or I2C GPS modules with NMEA support.
 Parsing of the NMEA sentences is done with the micropyGPS library.
+
+Tested with:
+- UBlox NEO-6M
+- Quectel L76-L
+
+pylint:
 """
 import time
 from machine import Timer
-
 from micropygps import MicropyGPS
 
 # Initialize logging
@@ -44,6 +49,7 @@ class DataReader(object):
     def __init__(self):
         self.__finished = False
         self.data = ''
+        self.segments_parsed = []
 
     def start(self, i2c=None, uart=None, timeout=5, gps_segments=SUPPORTED_GPS_SEGMENTS):
         """
@@ -51,7 +57,7 @@ class DataReader(object):
         """
         log.debug('Start reading the data')
 
-        segments_parsed = []
+        self.segments_parsed = []
         self.__finished = False
 
         """
@@ -89,11 +95,11 @@ class DataReader(object):
                         segment = data_item.split(',')[0].lstrip('$')
                         log.debug('Segment [' + segment + '] found')
 
-                        if not segment in segments_parsed:
-                            segments_parsed.append(segment)
+                        if not segment in self.segments_parsed:
+                            self.segments_parsed.append(segment)
                             self.data = self.data + data_item
 
-                        if all(i in segments_parsed for i in gps_segments):
+                        if all(i in self.segments_parsed for i in gps_segments):
                             self.__finished = True
                         else:
                             time.sleep_ms(2)
@@ -129,7 +135,9 @@ class GPS(object):
         self.__i2c = i2c
         self.__parser = MicropyGPS(location_formatting='dd')
         self.is_running = False
-        self.__timeout = timeout # Data reader timeout in seconds
+        self.coords_valid = False    # Coordinates found
+        self.is_valid = False        # All segments found
+        self.__timeout = timeout     # Data reader timeout in seconds
         self.__gps_segments = gps_segments
 
     def update(self):
@@ -143,8 +151,18 @@ class GPS(object):
         datareader.start(i2c=self.__i2c, uart=self.__uart, timeout=self.__timeout,
                          gps_segments=self.__gps_segments)
 
+        self.coords_valid = False
+        if all(i in datareader.segments_parsed for i in self.__gps_segments):
+            self.is_valid = True
+
         for c in datareader.data:
             self.__parser.update(str(c))
+
+        # Check if we found coords
+        if self.__parser.latitude[0] != 0 and \
+           self.__parser.longitude[0] != 0:
+            log.debug('Found coordinates')
+            self.coords_valid = True
 
         self.is_running = False
 
